@@ -5,3 +5,4 @@ export { default as SearchControls } from './SearchControls';
 export { default as ErrorDisplay } from './ErrorDisplay';
 export { default as LoadingSpinner } from './LoadingSpinner';
 export { default as SetupPage } from './SetupPage';
+export { default as ErrorBoundary } from './ErrorBoundary';
