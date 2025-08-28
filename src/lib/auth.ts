@@ -1,9 +1,9 @@
 import { SignJWT, jwtVerify } from 'jose';
 import { cookies } from 'next/headers';
 import { NextRequest } from 'next/server';
+import env from './env';
 
-const secretKey = process.env.JWT_SECRET;
-const key = new TextEncoder().encode(secretKey);
+const key = new TextEncoder().encode(env.JWT_SECRET);
 
 export async function encrypt(payload: Record<string, unknown>) {
   return await new SignJWT(payload)
@@ -26,10 +26,7 @@ export async function decrypt(input: string): Promise<Record<string, unknown> | 
 
 export async function login(email: string, password: string) {
   // Verify credentials against environment variables
-  const adminEmail = process.env.ADMIN_EMAIL;
-  const adminPassword = process.env.ADMIN_PASSWORD;
-
-  if (email === adminEmail && password === adminPassword) {
+  if (email === env.ADMIN_EMAIL && password === env.ADMIN_PASSWORD) {
     // Create the session
     const expires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
     const session = await encrypt({ email, expires });

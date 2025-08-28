@@ -1,36 +1,172 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Faculty Desk - HOD Dashboard
 
-## Getting Started
+A Next.js dashboard application for HODs to monitor faculty data completion status across Google Sheets.
 
-First, run the development server:
+## Features
+
+- **Authentication**: Secure login for HOD using email/password stored in environment variables
+- **Google Sheets Integration**: Reads data from multiple faculty Google Sheets
+- **Real-time Status Monitoring**: Shows completion status for each faculty across all required tabs
+- **Search & Filter**: Search faculty by name
+- **Responsive Design**: Clean, modern UI built with Tailwind CSS
+- **Color-coded Status**: Visual indicators for completion levels (Green/Yellow/Red)
+
+## Tech Stack
+
+- **Framework**: Next.js 15 with App Router
+- **Styling**: Tailwind CSS
+- **Authentication**: JWT-based session management
+- **API Integration**: Google Sheets API
+- **TypeScript**: Full type safety
+
+## Setup Instructions
+
+### 1. Clone and Install Dependencies
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone <repository-url>
+cd facultydesk
+npm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 2. Environment Configuration
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Create a `.env.local` file in the root directory:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+cp .env.local.example .env.local
+```
 
-## Learn More
+Update the following environment variables:
 
-To learn more about Next.js, take a look at the following resources:
+#### Authentication
+```env
+JWT_SECRET=your-super-secret-jwt-key-here
+ADMIN_EMAIL=hod@university.edu
+ADMIN_PASSWORD=your-secure-password
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+#### Google Sheets API Setup
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+1. Go to [Google Cloud Console](https://console.cloud.google.com/)
+2. Create a new project or select an existing one
+3. Enable the Google Sheets API
+4. Create credentials (Service Account):
+   - Go to "Credentials" → "Create Credentials" → "Service Account"
+   - Download the JSON key file
+5. Share your Google Sheets with the service account email
+6. Copy the entire JSON content to the environment variable:
 
-## Deploy on Vercel
+```env
+GOOGLE_SHEETS_CREDENTIALS={"type":"service_account","project_id":"...","private_key":"..."}
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### 3. Faculty Sheets Configuration
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Update the sheet IDs in `src/lib/faculty-sheets.ts`:
+
+```typescript
+export const facultySheets = {
+  "Faculty A": "your-sheet-id-1",
+  "Faculty B": "your-sheet-id-2",
+  // Add more faculty as needed
+};
+```
+
+### 4. Google Sheets Structure
+
+Each faculty sheet should have the following tabs:
+- `Course Completion`
+- `Class Taken`
+- `Unit Test`
+- `Internal 1`
+- `Internal 2`
+- `Model`
+
+**Important**: For the `Class Taken` tab, ensure today's date is present for it to be marked as ✅.
+
+### 5. Run the Application
+
+```bash
+# Development
+npm run dev
+
+# Production build
+npm run build
+npm start
+```
+
+The application will be available at `http://localhost:3000`.
+
+## Usage
+
+1. **Login**: Use the HOD credentials set in your environment variables
+2. **Dashboard**: View all faculty status cards showing completion for each tab
+3. **Search**: Use the search bar to filter faculty by name
+4. **Refresh**: Click the refresh button to get the latest data from Google Sheets
+5. **Status Indicators**:
+   - ✅ = Tab has data
+   - ❌ = Tab is empty or missing today's date (for Class Taken)
+
+## Color Coding
+
+- **Green**: All tabs completed
+- **Yellow**: Some tabs missing
+- **Red**: All tabs empty
+
+## API Endpoints
+
+### `GET /api/faculty-status`
+
+Returns the status of all faculty sheets.
+
+**Response**:
+```json
+{
+  "Faculty A": {
+    "Course Completion": true,
+    "Class Taken": true,
+    "Unit Test": false,
+    "Internal 1": true,
+    "Internal 2": false,
+    "Model": true
+  },
+  "Faculty B": { ... }
+}
+```
+
+## Project Structure
+
+```
+src/
+├── app/
+│   ├── api/faculty-status/          # API route for faculty data
+│   ├── dashboard/                   # Protected dashboard pages
+│   ├── login/                       # Authentication pages
+│   └── layout.tsx                   # Root layout
+├── components/
+│   └── FacultyStatusDashboard.tsx   # Main dashboard component
+└── lib/
+    ├── auth.ts                      # Authentication utilities
+    ├── faculty-sheets.ts            # Sheet configuration
+    └── google-sheets.ts             # Google Sheets API integration
+```
+
+## Security Features
+
+- JWT-based authentication
+- Protected API routes
+- Session management with HTTP-only cookies
+- Environment-based configuration
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Add tests if applicable
+5. Submit a pull request
+
+## License
+
+MIT License - see LICENSE file for details.
